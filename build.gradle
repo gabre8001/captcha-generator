@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.captcha'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // OpenCV with bundled native libraries for Windows/macOS/Linux
+    implementation 'org.openpnp:opencv:4.9.0-0'
+}
+
+application {
+    mainClass = 'com.captcha.Main'
+}
+
+// Fat JAR: includes all dependencies including native OpenCV libs
+tasks.named('jar') {
+    manifest {
+        attributes 'Main-Class': 'com.captcha.Main'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.named('run') {
+    // Ensure output directory exists before running
+    doFirst {
+        mkdir 'output'
+    }
+}
